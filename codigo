@@ -1,0 +1,138 @@
+const mongoose = require('mongoose');
+
+const options = {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+};
+
+// Conexão com o MongoDB
+mongoose.connect('mongodb://localhost:27017/livraria', options);
+
+module.exports = mongoose;
+const banco = require('./conexao');
+
+// Definindo o schema do Livro
+const LivroSchema = new banco.Schema({
+  titulo: String,
+  autor: String,
+  ano: Number
+});
+
+// Criando o modelo para a coleção "livros"
+const Livro = banco.model('Livro', LivroSchema, 'livros');
+module.exports = Livro;
+const Livro = require('./livro-schema');
+
+// Função para obter todos os livros
+const obterLivros = async () => {
+  return await Livro.find({});
+};
+
+// Função para incluir um novo livro
+const incluir = async (livro) => {
+  return await Livro.create(livro);
+};
+
+// Função para excluir um livro
+const excluir = async (codigo) => {
+  return await Livro.deleteOne({ _id: codigo });
+};
+
+module.exports = { obterLivros, incluir, excluir };
+const express = require('express');
+const router = express.Router();
+const { obterLivros, incluir, excluir } = require('../modelo/livro-dao');
+
+// Rota para obter todos os livros
+router.get('/', async (req, res) => {
+  const livros = await obterLivros();
+  res.json(livros);
+});
+
+// Rota para incluir um novo livro
+router.post('/', async (req, res) => {
+  try {
+    const livro = req.body;
+    await incluir(livro);
+    res.json({ message: 'Livro incluído com sucesso!' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao incluir livro!' });
+  }
+});
+
+// Rota para excluir um livro pelo código (_id)
+router.delete('/:codigo', async (req, res) => {
+  try {
+    const codigo = req.params.codigo;
+    await excluir(codigo);
+    res.json({ message: 'Livro excluído com sucesso!' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao excluir livro!' });
+  }
+});
+
+module.exports = router;
+const express = require('express');
+const cors = require('cors');
+const livroRouter = require('./routes/livros');
+
+const app = express();
+
+// Middleware de CORS e JSON
+app.use(cors());
+app.use(express.json());
+
+// Rota para a API de livros
+app.use('/livros', livroRouter);
+
+module.exports = app;
+#!/usr/bin/env node
+
+const app = require('../app');
+const http = require('http');
+
+const port = normalizePort(process.env.PORT || '3030');
+app.set('port', port);
+
+// Criação do servidor HTTP
+const server = http.createServer(app);
+
+// Iniciando o servidor
+server.listen(port);
+server.on('listening', () => {
+  console.log(`Servidor rodando na porta ${port}`);
+});
+
+// Função para normalizar a porta
+function normalizePort(val) {
+  const port = parseInt(val, 10);
+  if (isNaN(port)) return val;
+  if (port >= 0) return port;
+  return false;
+}
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ControleEditoraService {
+  // Vetor de editoras no formato JSON
+  private editoras = [
+    { codEditora: 1, nome: 'Editora A' },
+    { codEditora: 2, nome: 'Editora B' },
+    { codEditora: 3, nome: 'Editora C' }
+  ];
+
+  // Método para obter todas as editoras
+  getEditoras() {
+    return this.editoras;
+  }
+
+  // Método para obter o nome de uma editora pelo código
+  getNomeEditora(codEditora: number) {
+    const editora = this.editoras.filter(editora => editora.codEditora === codEditora);
+    return editora.length ? editora[0].nome : null;
+  }
+}
+'''npm install
+npm start'''
